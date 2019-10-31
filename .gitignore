@@ -20,3 +20,5 @@ datasets/spam
 datasets/titanic
 datasets/words
 
+.idea/
+venv/
