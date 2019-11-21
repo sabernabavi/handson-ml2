@@ -12,12 +12,17 @@ import urllib
 import warnings
 
 import matplotlib as mpl
+import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import train_test_split
+
+# from pandas.tools.plotting import scatter_matrix # For older versions of Pandas
+from pandas.plotting import scatter_matrix
+
 from zlib import crc32
 
 
@@ -56,9 +61,6 @@ def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
 
 warnings.filterwarnings(action="ignore", message="^internal gelsd")
 
-# In[2]:
-
-
 DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
 HOUSING_PATH = os.path.join("datasets", "housing")
 HOUSING_URL = DOWNLOAD_ROOT + "datasets/housing/housing.tgz"
@@ -74,12 +76,6 @@ def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
     housing_tgz.close()
 
     print("fetch_housing_data: data is in ", housing_path, '\n')
-
-
-# In[3]:
-
-
-# In[4]:
 
 
 def load_housing_data(housing_path=HOUSING_PATH):
@@ -238,130 +234,95 @@ def income_cat_proportions(data):
     return data["income_cat"].value_counts() / len(data)
 
 
-# # # Discover and visualize the data to gain insights
-#
-# # In[32]:
-#
-#
-# housing = strat_train_set.copy()
-#
-# # In[33]:
-#
-#
-# housing.plot(kind="scatter", x="longitude", y="latitude")
-# save_fig("bad_visualization_plot")
-#
-# # In[34]:
-#
-#
-# housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)
-# save_fig("better_visualization_plot")
-#
-# # The argument `sharex=False` fixes a display bug (the x-axis values and legend were not displayed). This is a temporary fix (see: https://github.com/pandas-dev/pandas/issues/10611 ). Thanks to Wilmer Arellano for pointing it out.
-#
-# # In[35]:
-#
-#
-# housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4,
-#              s=housing["population"] / 100, label="population", figsize=(10, 7),
-#              c="median_house_value", cmap=plt.get_cmap("jet"), colorbar=True,
-#              sharex=False)
-# plt.legend()
-# save_fig("housing_prices_scatterplot")
-#
-# # In[36]:
-#
-#
-# # Download the California image
-# images_path = os.path.join(PROJECT_ROOT_DIR, "images", "end_to_end_project")
-# os.makedirs(images_path, exist_ok=True)
-# DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
-# filename = "california.png"
-# print("Downloading", filename)
-# url = DOWNLOAD_ROOT + "images/end_to_end_project/" + filename
-# urllib.request.urlretrieve(url, os.path.join(images_path, filename))
-#
-# # In[37]:
-#
-#
-# import matplotlib.image as mpimg
-#
-# california_img = mpimg.imread(os.path.join(images_path, filename))
-# ax = housing.plot(kind="scatter", x="longitude", y="latitude", figsize=(10, 7),
-#                   s=housing['population'] / 100, label="Population",
-#                   c="median_house_value", cmap=plt.get_cmap("jet"),
-#                   colorbar=False, alpha=0.4,
-#                   )
-# plt.imshow(california_img, extent=[-124.55, -113.80, 32.45, 42.05], alpha=0.5,
-#            cmap=plt.get_cmap("jet"))
-# plt.ylabel("Latitude", fontsize=14)
-# plt.xlabel("Longitude", fontsize=14)
-#
-# prices = housing["median_house_value"]
-# tick_values = np.linspace(prices.min(), prices.max(), 11)
-# cbar = plt.colorbar()
-# cbar.ax.set_yticklabels(["$%dk" % (round(v / 1000)) for v in tick_values], fontsize=14)
-# cbar.set_label('Median House Value', fontsize=16)
-#
-# plt.legend(fontsize=16)
-# save_fig("california_housing_prices_plot")
-# plt.show()
-#
-# # In[38]:
-#
-#
-# corr_matrix = housing.corr()
-#
-# # In[39]:
-#
-#
-# corr_matrix["median_house_value"].sort_values(ascending=False)
-#
-# # In[40]:
-#
-#
-# # from pandas.tools.plotting import scatter_matrix # For older versions of Pandas
-# from pandas.plotting import scatter_matrix
-#
-# attributes = ["median_house_value", "median_income", "total_rooms",
-#               "housing_median_age"]
-# scatter_matrix(housing[attributes], figsize=(12, 8))
-# save_fig("scatter_matrix_plot")
-#
-# # In[41]:
-#
-#
-# housing.plot(kind="scatter", x="median_income", y="median_house_value",
-#              alpha=0.1)
-# plt.axis([0, 16, 0, 550000])
-# save_fig("income_vs_house_value_scatterplot")
-#
-# # In[42]:
-#
-#
-# housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
-# housing["bedrooms_per_room"] = housing["total_bedrooms"] / housing["total_rooms"]
-# housing["population_per_household"] = housing["population"] / housing["households"]
-#
-# # In[43]:
-#
-#
-# corr_matrix = housing.corr()
-# corr_matrix["median_house_value"].sort_values(ascending=False)
-#
-# # In[44]:
-#
-#
-# housing.plot(kind="scatter", x="rooms_per_household", y="median_house_value",
-#              alpha=0.2)
-# plt.axis([0, 5, 0, 520000])
-# plt.show()
-#
-# # In[45]:
-#
-#
-# housing.describe()
-#
+def visualizing_geographical_data(housing):
+    print(type(housing))
+    housing.plot(kind="scatter", x="longitude", y="latitude")
+    save_fig("bad_visualization_plot")
+    plt.show()
+
+    housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)
+    save_fig("better_visualization_plot")
+    plt.show()
+
+    # # The argument `sharex=False` fixes a display bug (the x-axis values and legend were not displayed).
+    # This is a temporary fix (see: https://github.com/pandas-dev/pandas/issues/10611 ).
+    # Thanks to Wilmer Arellano for pointing it out.
+
+    housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4,
+                 s=housing["population"] / 100, label="population", figsize=(10, 7),
+                 c="median_house_value", cmap=plt.get_cmap("jet"), colorbar=True,
+                 sharex=False)
+    plt.legend()
+    plt.show()
+    save_fig("housing_prices_scatterplot")
+
+    # # Download the California image
+    images_path = os.path.join(PROJECT_ROOT_DIR, "images", "end_to_end_project")
+    os.makedirs(images_path, exist_ok=True)
+    # DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
+    filename = "california.png"
+    print("Downloading", filename)
+    url = DOWNLOAD_ROOT + "images/end_to_end_project/" + filename
+    urllib.request.urlretrieve(url, os.path.join(images_path, filename))
+
+    california_img = mpimg.imread(os.path.join(images_path, filename))
+    ax = housing.plot(kind="scatter", x="longitude", y="latitude", figsize=(10, 7),
+                      s=housing['population'] / 100, label="Population",
+                      c="median_house_value", cmap=plt.get_cmap("jet"),
+                      colorbar=False, alpha=0.4,
+                      )
+    plt.imshow(california_img, extent=[-124.55, -113.80, 32.45, 42.05], alpha=0.5,
+               cmap=plt.get_cmap("jet"))
+    plt.ylabel("Latitude", fontsize=14)
+    plt.xlabel("Longitude", fontsize=14)
+
+    prices = housing["median_house_value"]
+    tick_values = np.linspace(prices.min(), prices.max(), 11)
+    cbar = plt.colorbar()
+    cbar.ax.set_yticklabels(["$%dk" % (round(v / 1000)) for v in tick_values], fontsize=14)
+    cbar.set_label('Median House Value', fontsize=16)
+
+    plt.legend(fontsize=16)
+    save_fig("california_housing_prices_plot")
+    plt.show()
+
+
+def look_for_correlations(housing):
+    corr_matrix = housing.corr()
+    print(type(corr_matrix), corr_matrix, '\n')
+    print(corr_matrix["median_house_value"].sort_values(ascending=False))
+    attributes = ["median_house_value", "median_income", "total_rooms",
+                  "housing_median_age"]
+
+    # scatter_matrix is implemented in pandas.plotting
+    # for each parameter against itself, scatter_matrix draws histogram instead of correlation.
+    scatter_matrix(housing[attributes], figsize=(12, 8))
+    plt.show()
+    save_fig("scatter_matrix_plot")
+
+    housing.plot(kind="scatter", x="median_income", y="median_house_value",
+                 alpha=0.1)
+    plt.axis([0, 16, 0, 550000])
+    plt.show()
+    save_fig("income_vs_house_value_scatterplot")
+
+
+def combine_attributes(housing):
+    housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
+    housing["bedrooms_per_room"] = housing["total_bedrooms"] / housing["total_rooms"]
+    housing["population_per_household"] = housing["population"] / housing["households"]
+
+    corr_matrix = housing.corr()
+    print(corr_matrix["median_house_value"].sort_values(ascending=False))
+
+    housing.plot(kind="scatter", x="rooms_per_household", y="median_house_value",
+                 alpha=0.2)
+    plt.axis([0, 5, 0, 520000])
+    plt.show()
+
+    print(housing["bedrooms_per_room"].describe())
+
+
 # # # Prepare the data for Machine Learning algorithms
 #
 # # In[46]:
@@ -1267,7 +1228,15 @@ def main():
     np.random.seed(42)
     strat_train_set, strat_test_set = create_a_test_set()
     housing = strat_train_set.copy()
-    print(len(housing))
+
+    # # Discover and visualize the data to gain insights
+    # visualizing_geographical_data(housing=housing)
+
+    # # Looking for Correlations
+    # look_for_correlations(housing=housing)
+
+    # # Experimenting with Attribute Combinations
+    combine_attributes(housing=housing)
 
 
 if __name__ == '__main__':
